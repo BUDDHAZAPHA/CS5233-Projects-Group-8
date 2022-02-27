@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\O2DESNet.Libraries\MathNet.Numerics\MathNet.Numerics.csproj" />
+    <ProjectReference Include="..\O2DESNet.Libraries\O2DESNet.RCQueues\O2DESNet.RCQueues.csproj" />
+    <ProjectReference Include="..\O2DESNet.Libraries\O2DESNet\O2DESNet.csproj" />
+  </ItemGroup>
+
+</Project>
