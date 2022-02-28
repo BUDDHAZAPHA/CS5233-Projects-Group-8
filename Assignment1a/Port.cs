@@ -1,4 +1,5 @@
 ﻿using O2DESNet;
+using MathNet;
 using O2DESNet.Distributions;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,6 @@ namespace Assignment1a
     public class Port : Sandbox
     {
 
-             
-        public int Count { get; set; }
         public int NoInServer1 { get; set; }
         public int NoInServer2 { get; set; }
         public int NoInQueue { get; set; }
@@ -30,7 +29,22 @@ namespace Assignment1a
         {
             get
             {
-                return ProcessedList.Average(ship => (ship.TimeStamp_End - ship.TimeStamp_Arrive).TotalMinutes);
+                return ProcessedList.Average(ship => (ship.TimeStamp_End - ship.TimeStamp_Arrive).TotalDays);
+            }
+        }
+
+        public double MaxBerthTime
+        {
+            get
+            {
+                return ProcessedList.Max(ship => (ship.TimeStamp_End - ship.TimeStamp_Arrive).TotalDays);
+            }
+        }
+        public double MinBerthTime
+        {
+            get
+            {
+                return ProcessedList.Min(ship => (ship.TimeStamp_End - ship.TimeStamp_Arrive).TotalDays);
             }
         }
 
@@ -41,25 +55,35 @@ namespace Assignment1a
                 return ProcessedList.Average(ship => (ship.TimeStamp_End - ship.TimeStamp_Start).TotalDays);
             }
         }
+        public HourCounter HC_InQueue { get; set; }
+        public HourCounter HC_InServer1 { get; set; }
+        public HourCounter HC_InServer2 { get; set; }
+        public HourCounter HC_InSystem { get; set; }
         public PortStats Config { get; set; }
 
         
         public Port(PortStats config,int seed) : base(seed)
         {
             Config = config;
-           
+            HC_InQueue = AddHourCounter();
+            HC_InServer1 = AddHourCounter();
+            HC_InServer2 = AddHourCounter();
+            HC_InSystem = AddHourCounter();
             Schedule(()=>Arrive(new Ship { Index=0}));
            
         }
         void Arrive(Ship ship)
         {
             NoInQueue++;
+            HC_InQueue.ObserveChange(1);
+            HC_InSystem.ObserveChange(1);
+          //  HC_InQueue.ObserveCount(NoInQueue);
             if (NoInServer1 < Config.ServerCapacity)  Schedule(()=> StartServer1(ship));
-            else if(NoInServer2 < Config.ServerCapacity) Schedule(() => StartServer2(ship));
+           else if(NoInServer2 < Config.ServerCapacity) Schedule(() => StartServer2(ship));
             else
                 PendingList.Add(ship);
 
-            Schedule(() => Arrive(new Ship { Index = ship.Index + 1 }), TimeSpan.FromDays(Exponential.Sample(DefaultRS, Config.ExpectedArrivalTime)));
+            Schedule(() => Arrive(new Ship { Index = ship.Index + 1 }), TimeSpan.FromDays(MathNet.Numerics.Distributions.Exponential.Sample(DefaultRS, Config.ExpectedArrivalTime)));
             ship.TimeStamp_Arrive = ClockTime;
             
             Console.WriteLine($"{ClockTime} \tArrive#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
@@ -68,23 +92,35 @@ namespace Assignment1a
         {
             NoInServer1++;
             NoInQueue--;
+         
+            HC_InQueue.ObserveChange(-1);
+            HC_InServer1.ObserveChange(1);
+            //HC_InQueue.ObserveCount(NoInQueue);
             ship.TimeStamp_Start = ClockTime;
-            Schedule(() => End1(ship), TimeSpan.FromDays(Uniform.Sample(DefaultRS, Config.ExpectedServiceStartTime, Config.ExpectedServiceEndTime)));
+           
+            Schedule(() => End1(ship), TimeSpan.FromDays(MathNet.Numerics.Distributions.ContinuousUniform.Sample(DefaultRS, Config.ExpectedServiceStartTime, Config.ExpectedServiceEndTime)));
 
-            Console.WriteLine($"{ClockTime} \tArrive#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
+            Console.WriteLine($"{ClockTime} \tStart1#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
         }
         void StartServer2(Ship ship)
         {
             NoInServer2++;
             NoInQueue--;
             ship.TimeStamp_Start = ClockTime;
-            Schedule(() => End2(ship), TimeSpan.FromDays(Uniform.Sample(DefaultRS, Config.ExpectedServiceStartTime, Config.ExpectedServiceEndTime)));
-            Console.WriteLine($"{ClockTime} \tArrive#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
+            HC_InServer2.ObserveCount(NoInServer2);
+            HC_InQueue.ObserveChange(-1);
+            HC_InServer2.ObserveChange(1);
+          
+            Schedule(() => End2(ship), TimeSpan.FromDays(MathNet.Numerics.Distributions.ContinuousUniform.Sample(DefaultRS, Config.ExpectedServiceStartTime, Config.ExpectedServiceEndTime)));
+            Console.WriteLine($"{ClockTime} \tStart2#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
 
         }
         void End1(Ship ship)
         {
             NoInServer1--;
+            HC_InSystem.ObserveChange(-1);
+            HC_InServer1.ObserveChange(-1);
+           // HC_InSystem.ObserveCount(NoInServer2);
             if (NoInQueue > 0)
             {
                 //because fifo
@@ -95,12 +131,14 @@ namespace Assignment1a
 
             ship.TimeStamp_End = ClockTime;
             ProcessedList.Add(ship);
-            Console.WriteLine($"{ClockTime} \tArrive#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
+            Console.WriteLine($"{ClockTime} \tEnd1#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
 
         }
         void End2(Ship ship)
         {
             NoInServer2--;
+            HC_InServer2.ObserveChange(-1);
+            HC_InSystem.ObserveChange(-1);
             if (NoInQueue > 0)
             {
                 //because fifo
@@ -111,7 +149,7 @@ namespace Assignment1a
 
             ship.TimeStamp_End = ClockTime;
             ProcessedList.Add(ship);
-            Console.WriteLine($"{ClockTime} \tArrive#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
+            Console.WriteLine($"{ClockTime} \tEnd2#{ship.Index}\tQ={NoInQueue}\tS1={NoInServer1}\tS2={NoInServer2}");
 
         }
     }
