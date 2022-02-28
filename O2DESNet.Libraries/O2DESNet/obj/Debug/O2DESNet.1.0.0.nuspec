@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>O2DESNet</id>
+    <version>1.0.0</version>
+    <authors>Li Haobin</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>http://www.o2des.net/</projectUrl>
+    <iconUrl>http://www.o2des.net/wp-content/uploads/2016/10/o2des.png</iconUrl>
+    <description>A framework for Object-Oriented Discrete Event Simulation</description>
+    <copyright>Copyright © 2015-2019 O²DES.NET</copyright>
+    <tags>O2DES.Net Discrete-Event Simulation</tags>
+    <repository type="git" url="https://github.com/li-haobin/O2DES.Net" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="MathNet.Numerics" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog" version="2.9.0" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.Console" version="3.1.1" exclude="Build,Analyzers" />
+        <dependency id="Serilog.Sinks.File" version="4.1.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="D:\CS5233\Assignment1a\O2DESNet.Libraries\O2DESNet\bin\Debug\netstandard2.1\O2DESNet.dll" target="lib\netstandard2.1\O2DESNet.dll" />
+  </files>
+</package>

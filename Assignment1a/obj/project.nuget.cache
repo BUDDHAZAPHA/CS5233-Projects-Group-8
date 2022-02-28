@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "JH2Oi1J0AXIPk17yAAhEqvY/mVoaqy4bROB51RnlG0q7kmqWuBdq9no8/2U5bDjfVKxhwnN+cenxaQ9WoaUUmg==",
+  "success": true,
+  "projectFilePath": "D:\\CS5233\\Assignment1a\\Assignment1a\\Assignment1a.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mjethra\\.nuget\\packages\\mathnet.numerics\\4.15.0\\mathnet.numerics.4.15.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.platforms\\2.0.0\\microsoft.netcore.platforms.2.0.0.nupkg.sha512",
+    "C:\\Users\\mjethra\\.nuget\\packages\\microsoft.win32.systemevents\\4.5.0\\microsoft.win32.systemevents.4.5.0.nupkg.sha512",
+    "C:\\Users\\mjethra\\.nuget\\packages\\o2desnet\\3.7.1\\o2desnet.3.7.1.nupkg.sha512",
+    "C:\\Users\\mjethra\\.nuget\\packages\\o2desnet.rcqueues\\3.10.0\\o2desnet.rcqueues.3.10.0.nupkg.sha512",
+    "C:\\Users\\mjethra\\.nuget\\packages\\system.drawing.common\\4.5.1\\system.drawing.common.4.5.1.nupkg.sha512"
+  ],
+  "logs": []
+}

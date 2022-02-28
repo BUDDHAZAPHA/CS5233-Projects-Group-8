@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "yIXwPotKR90BhDmhxNyMm4AN9vp1eixBi9Oi6meJKO5wMsOd/a9SlgkxMK4paFcXjKnEJItHK9ORI0GQbmdAeA==",
+  "success": true,
+  "projectFilePath": "D:\\CS5233\\Assignment1a\\O2DESNet.Libraries\\MathNet.Numerics\\MathNet.Numerics.csproj",
+  "expectedPackageFiles": [
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
