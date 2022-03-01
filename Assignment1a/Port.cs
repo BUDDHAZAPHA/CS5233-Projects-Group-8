@@ -25,6 +25,16 @@ namespace Assignment1a
         public int NoInQueue { get; set; }
         public List<Ship> PendingList = new();
         public List<Ship> ProcessedList = new();
+        public int ProcessCounts
+        {
+            get
+            {
+                 var shipLists= ProcessedList.Select(ship => (ship.TimeStamp_End - ship.TimeStamp_Arrive).TotalDays).ToList();
+                 return shipLists.Where(x => x > 2.0).Select(x=>x).Count();    
+                 
+            }
+        }
+
         public double AverageCycleTime
         {
             get
