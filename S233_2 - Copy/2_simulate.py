@@ -29,7 +29,7 @@ SIM_DURATION = 10 * 3600  # unit: second
 
 class System:
     def __init__(self):
-        # list of channel id => call mapping, channel id in range [0, 20)
+        # list of channel id => call mapping, channel id in range [0, 10)
         self.channels = [{} for _ in range(20)]
         # priority queue of event, i.e. (instant, event id, dict) tuple
         self.event_queue = []
