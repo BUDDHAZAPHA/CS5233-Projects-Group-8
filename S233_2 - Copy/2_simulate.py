@@ -24,12 +24,12 @@ def generate_speed():
     return rng.normal(loc=90, scale=8.22)
 
 
-SIM_DURATION = 10 * 3600  # unit: second
+SIM_DURATION = 100 * 3600  # unit: second
 
 
 class System:
     def __init__(self):
-        # list of channel id => call mapping, channel id in range [0, 10)
+        # list of channel id => call mapping, channel id in range [0, 20)
         self.channels = [{} for _ in range(20)]
         # priority queue of event, i.e. (instant, event id, dict) tuple
         self.event_queue = []
@@ -102,9 +102,9 @@ class System:
     def push_next_event_for_call(self, cell, channel, location, duration, speed):
         next_cell = cell + 1
         # distance in current cell / speed
-        after_duration = (2 - location % 2) / speed
+        cell_duration = (2 - location % 2) / speed
 
-        if after_duration <= duration:
+        if cell_duration >= duration:
             end = {
                 "type": "end",
                 "cell": cell,
@@ -117,16 +117,16 @@ class System:
                 "cell": cell,
                 "channel": channel,
             }
-            self.push_event(after_duration, end)
+            self.push_event(cell_duration, end)
         else:
             handover = {
                 "type": "handover",
                 "current_channel": channel,
                 "next_cell": next_cell,
-                "duration": duration - after_duration,
+                "duration": duration - cell_duration,
                 "speed": speed,
             }
-            self.push_event(after_duration, handover)
+            self.push_event(cell_duration, handover)
 
     def on_handover(self, current_channel, next_cell, duration, speed):
         del self.channels[next_cell - 1][current_channel]
@@ -181,6 +181,6 @@ print(f"blocked call: {system.blocked_call / total_call * 100:.2f}%")
 print(f"dropped call: {system.dropped_call / total_call * 100:.2f}%")
 
 # Output
-# total: 26528 blocked: 3701 dropped: 4165
-# blocked call: 13.95%
-# dropped call: 15.70%
+# total: 267243 blocked: 1825 dropped: 2421
+# blocked call: 0.68%
+# dropped call: 0.91%

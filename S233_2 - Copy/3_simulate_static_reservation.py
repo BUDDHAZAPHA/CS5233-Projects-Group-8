@@ -24,8 +24,8 @@ def generate_speed():
     return rng.normal(loc=90, scale=8.22)
 
 
-SIM_DURATION = 10 * 3600  # unit: second
-HANDOVER_RESERVED = 5
+SIM_DURATION = 100 * 3600  # unit: second
+HANDOVER_RESERVED = 1
 
 
 class System:
@@ -103,9 +103,9 @@ class System:
     def push_next_event_for_call(self, cell, channel, location, duration, speed):
         next_cell = cell + 1
         # distance in current cell / speed
-        after_duration = (2 - location % 2) / speed
+        cell_duration = (2 - location % 2) / speed
 
-        if after_duration <= duration:
+        if cell_duration >= duration:
             end = {
                 "type": "end",
                 "cell": cell,
@@ -118,16 +118,16 @@ class System:
                 "cell": cell,
                 "channel": channel,
             }
-            self.push_event(after_duration, end)
+            self.push_event(cell_duration, end)
         else:
             handover = {
                 "type": "handover",
                 "current_channel": channel,
                 "next_cell": next_cell,
-                "duration": duration - after_duration,
+                "duration": duration - cell_duration,
                 "speed": speed,
             }
-            self.push_event(after_duration, handover)
+            self.push_event(cell_duration, handover)
 
     def on_handover(self, current_channel, next_cell, duration, speed):
         del self.channels[next_cell - 1][current_channel]
@@ -182,23 +182,6 @@ print(f"blocked call: {system.blocked_call / total_call * 100:.2f}%")
 print(f"dropped call: {system.dropped_call / total_call * 100:.2f}%")
 
 # Output
-# 1 channel
-# total: 26492 blocked: 5408 dropped: 3545
-# blocked call: 20.41%
-# dropped call: 13.38%
-# 2 channel
-# total: 26280 blocked: 7135 dropped: 2869
-# blocked call: 27.15%
-# dropped call: 10.92%
-# 3 channel
-# total: 26484 blocked: 9242 dropped: 2072
-# blocked call: 34.90%
-# dropped call: 7.82%
-# 4 channel
-# total: 26353 blocked: 11147 dropped: 1589
-# blocked call: 42.30%
-# dropped call: 6.03%
-# 5 channel
-# total: 26474 blocked: 13095 dropped: 1105
-# blocked call: 49.46%
-# dropped call: 4.17%
+# total: 265723 blocked: 4199 dropped: 1515
+# blocked call: 1.58%
+# dropped call: 0.57%
