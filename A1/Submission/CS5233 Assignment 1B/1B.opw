@@ -1,0 +1,26 @@
+[RESOURCES]
+[VARIABLES]
+Decide 2.NumberOut False
+Terminal 2.NumberOut
+Exit.NumberOut
+Terminal 4.NumberOut
+Entry.NumberOut
+Terminal 7.NumberOut
+Terminal 1.NumberOut
+Terminal 9.NumberIn
+Terminal 8.NumberIn
+Terminal 7.NumberIn
+Terminal 6.NumberIn
+Terminal 5.NumberIn
+Terminal 4.NumberIn
+Terminal 3.NumberIn
+Terminal 2.NumberIn
+Terminal 1.NumberIn
+Terminal 10.NumberIn
+Terminal 10.NumberOut
+Terminal 5.NumberOut
+Terminal 9.NumberOut
+Terminal 3.NumberOut
+Terminal 8.NumberOut
+Terminal 6.NumberOut
+Decide 2.NumberOut True
