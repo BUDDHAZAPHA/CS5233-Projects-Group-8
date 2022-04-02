@@ -4,20 +4,24 @@ import numpy as np
 import statistics as stat
 from scipy.stats import t
 
+NUM_STATIONS = 20
+STATION_SCALING = 20/NUM_STATIONS
+
 # SCALED_UP = 1 indicates the base level network traffic
 # SCALED_UP < 1 indicates ((1-SCALED_UP)*100)% increased network traffic
 SCALED_UP = 0.99
 rng = default_rng()
 
+
 # unit: second
 def generate_interval():
-    return rng.exponential(scale=1.35*SCALED_UP)
+    return rng.exponential(scale=1.35*SCALED_UP*STATION_SCALING)
 
 
 # call arrival location relative to entrance of highway, i.e. 0KM of cell 0
 # unit: km
 def generate_location():
-    return rng.uniform(low=0, high=40)
+    return rng.uniform(low=0, high=2*NUM_STATIONS)
 
 
 # unit: second
@@ -32,11 +36,10 @@ def generate_speed():
 
 SIM_DURATION = 100 * 3600  # unit: second
 
-
 class System:
     def __init__(self):
         # list of channel id => call mapping, channel id in range [0, 20)
-        self.channels = [{} for _ in range(20)]
+        self.channels = [{} for _ in range(NUM_STATIONS)]
         # priority queue of event, i.e. (instant, event id, dict) tuple
         self.event_queue = []
         self.event_id = 0
@@ -88,7 +91,7 @@ class System:
         self.generate_call()
 
         cell = int(location // 2)
-        assert 0 <= cell < 20
+        assert 0 <= cell < NUM_STATIONS
 
         channel = self.handle_initiate(cell)
         if channel is None:
@@ -117,7 +120,7 @@ class System:
                 "channel": channel,
             }
             self.push_event(duration, end)
-        elif next_cell == 20:
+        elif next_cell == NUM_STATIONS:
             end = {
                 "type": "end",
                 "cell": cell,
