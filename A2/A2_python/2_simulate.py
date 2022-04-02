@@ -1,11 +1,17 @@
 from heapq import heappop, heappush
 from numpy.random import default_rng
+import numpy as np 
+import statistics as stat
+from scipy.stats import t
 
+# SCALED_UP = 1 indicates the base level network traffic
+# SCALED_UP < 1 indicates ((1-SCALED_UP)*100)% increased network traffic
+SCALED_UP = 0.99
 rng = default_rng()
 
 # unit: second
 def generate_interval():
-    return rng.exponential(scale=1.35)
+    return rng.exponential(scale=1.35*SCALED_UP)
 
 
 # call arrival location relative to entrance of highway, i.e. 0KM of cell 0
@@ -169,18 +175,52 @@ class System:
         return self.event_queue[0][0] >= time_limit
 
 
-system = System()
-while not system.is_time_up(SIM_DURATION):
-    system.deliver_next_event()
+REPLICATIONS = 20
+CONFLEVEL = 99
+two_tail = (1-CONFLEVEL/100)/2
+blocked_samples = []
+dropped_samples = []
+for r in range(REPLICATIONS):
+    system = System()
+    while not system.is_time_up(SIM_DURATION):
+        system.deliver_next_event()
 
-total_call = system.successful_call + system.blocked_call + system.dropped_call
-print(
-    f"total: {total_call} blocked: {system.blocked_call} dropped: {system.dropped_call}"
-)
-print(f"blocked call: {system.blocked_call / total_call * 100:.2f}%")
-print(f"dropped call: {system.dropped_call / total_call * 100:.2f}%")
+    total_call = system.successful_call + system.blocked_call + system.dropped_call
+    print(
+        f"total: {total_call} blocked: {system.blocked_call} dropped: {system.dropped_call}"
+    )
+    blocked_samples.append(system.blocked_call / total_call)
+    dropped_samples.append(system.dropped_call / total_call)
 
-# Output
-# total: 267243 blocked: 1825 dropped: 2421
-# blocked call: 0.68%
-# dropped call: 0.91%
+mena_block_rate = np.mean(blocked_samples) * 100
+block_conf_inter = 100 * t.ppf(1-two_tail,REPLICATIONS-1) * stat.pstdev(blocked_samples) / np.sqrt(REPLICATIONS)
+mean_drop_rate = np.mean(dropped_samples) * 100
+drop_conf_inter = 100 * t.ppf(1-two_tail,REPLICATIONS-1) * stat.pstdev(dropped_samples) / np.sqrt(REPLICATIONS)
+print(f"blocked call: {mena_block_rate:.2f}% +/- {block_conf_inter:.4f}%")
+print(f"dropped call: {mean_drop_rate:.2f}% +/- {drop_conf_inter:.4f}%")
+
+'''
+Sample Output (SCALING_UP=1):
+total: 265893 blocked: 1798 dropped: 2361
+total: 265238 blocked: 1727 dropped: 2389
+total: 267111 blocked: 1946 dropped: 2423
+total: 266285 blocked: 1806 dropped: 2382
+total: 266677 blocked: 1851 dropped: 2487
+total: 266401 blocked: 1815 dropped: 2448
+total: 266561 blocked: 1818 dropped: 2402
+total: 266269 blocked: 1858 dropped: 2482
+total: 266805 blocked: 1863 dropped: 2478
+total: 266570 blocked: 1810 dropped: 2356
+total: 266274 blocked: 1890 dropped: 2471
+total: 265470 blocked: 1760 dropped: 2305
+total: 266689 blocked: 1903 dropped: 2562
+total: 267160 blocked: 1947 dropped: 2584
+total: 267877 blocked: 1875 dropped: 2556
+total: 267732 blocked: 1876 dropped: 2516
+total: 266656 blocked: 1835 dropped: 2490
+total: 266887 blocked: 1798 dropped: 2384
+total: 265727 blocked: 1720 dropped: 2408
+total: 266641 blocked: 1876 dropped: 2413
+blocked call: 0.69% +/- 0.0139%
+dropped call: 0.92% +/- 0.0167%
+'''

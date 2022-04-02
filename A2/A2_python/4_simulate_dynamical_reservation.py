@@ -1,11 +1,17 @@
 from heapq import heappop, heappush
 from numpy.random import default_rng
+import numpy as np 
+import statistics as stat
+from scipy.stats import t
 
+# SCALED_UP = 1 indicates the base level network traffic
+# SCALED_UP < 1 indicates ((1-SCALED_UP)*100)% increased network traffic
+SCALED_UP = 1
 rng = default_rng()
 
 # unit: second
 def generate_interval():
-    return rng.exponential(scale=1.35)
+    return rng.exponential(scale=1.35*SCALED_UP)
 
 
 # call arrival location relative to entrance of highway, i.e. 0KM of cell 0
@@ -25,7 +31,7 @@ def generate_speed():
 
 
 SIM_DURATION = 100 * 3600  # unit: second
-HANDOVER_RESERVED = 1
+HANDOVER_RESERVED = 4
 
 
 class System:
@@ -178,18 +184,52 @@ class System:
         return self.event_queue[0][0] >= time_limit
 
 
-system = System()
-while not system.is_time_up(SIM_DURATION):
-    system.deliver_next_event()
+REPLICATIONS = 20
+CONFLEVEL = 99
+two_tail = (1-CONFLEVEL/100)/2
+blocked_samples = []
+dropped_samples = []
+for r in range(REPLICATIONS):
+    system = System()
+    while not system.is_time_up(SIM_DURATION):
+        system.deliver_next_event()
 
-total_call = system.successful_call + system.blocked_call + system.dropped_call
-print(
-    f"total: {total_call} blocked: {system.blocked_call} dropped: {system.dropped_call}"
-)
-print(f"blocked call: {system.blocked_call / total_call * 100:.2f}%")
-print(f"dropped call: {system.dropped_call / total_call * 100:.2f}%")
+    total_call = system.successful_call + system.blocked_call + system.dropped_call
+    print(
+        f"total: {total_call} blocked: {system.blocked_call} dropped: {system.dropped_call}"
+    )
+    blocked_samples.append(system.blocked_call / total_call)
+    dropped_samples.append(system.dropped_call / total_call)
 
-# Output
-# total: 265981 blocked: 2121 dropped: 2316
-# blocked call: 0.80%
-# dropped call: 0.87%
+mena_block_rate = np.mean(blocked_samples) * 100
+block_conf_inter = 100 * t.ppf(1-two_tail,REPLICATIONS-1) * stat.pstdev(blocked_samples) / np.sqrt(REPLICATIONS)
+mean_drop_rate = np.mean(dropped_samples) * 100
+drop_conf_inter = 100 * t.ppf(1-two_tail,REPLICATIONS-1) * stat.pstdev(dropped_samples) / np.sqrt(REPLICATIONS)
+print(f"blocked call: {mena_block_rate:.2f}% +/- {block_conf_inter:.4f}%")
+print(f"dropped call: {mean_drop_rate:.2f}% +/- {drop_conf_inter:.4f}%")
+
+'''
+Sample Output: 
+total: 283251 blocked: 5066 dropped: 2708
+total: 282646 blocked: 5226 dropped: 2739
+total: 284152 blocked: 5287 dropped: 2871
+total: 283112 blocked: 5306 dropped: 2861
+total: 283904 blocked: 5380 dropped: 2885
+total: 283039 blocked: 5209 dropped: 2698
+total: 283085 blocked: 5133 dropped: 2835
+total: 283899 blocked: 5362 dropped: 2894
+total: 283099 blocked: 5155 dropped: 2791
+total: 283188 blocked: 5095 dropped: 2742
+total: 284011 blocked: 5223 dropped: 2858
+total: 283313 blocked: 5116 dropped: 2729
+total: 283798 blocked: 5143 dropped: 2830
+total: 284394 blocked: 5504 dropped: 2859
+total: 283268 blocked: 5115 dropped: 2803
+total: 282304 blocked: 5119 dropped: 2834
+total: 283881 blocked: 5105 dropped: 2769
+total: 283602 blocked: 5087 dropped: 2863
+total: 284172 blocked: 5435 dropped: 2876
+total: 284100 blocked: 5256 dropped: 2883
+blocked call: 1.84% +/- 0.0266%
+dropped call: 0.99% +/- 0.0135%
+'''
