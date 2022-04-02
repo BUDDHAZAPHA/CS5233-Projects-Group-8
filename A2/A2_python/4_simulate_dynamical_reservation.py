@@ -6,7 +6,7 @@ from scipy.stats import t
 
 # SCALED_UP = 1 indicates the base level network traffic
 # SCALED_UP < 1 indicates ((1-SCALED_UP)*100)% increased network traffic
-SCALED_UP = 1
+SCALED_UP = 0.94
 rng = default_rng()
 
 # unit: second
